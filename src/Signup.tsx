@@ -8,8 +8,8 @@ function Signup() {
     password: "",
   });
 
-  const [errorMessage, setErrorMessage] = useState<string[]>([]); // Initialize as an array
-  const [loading, setLoading] = useState(false); // Loading state
+  const [errorMessage, setErrorMessage] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -19,11 +19,13 @@ function Signup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage([]); // Clear any previous errors
+    setErrorMessage([]);
     setLoading(true);
 
     try {
-      var url = import.meta.env.VITE_BACKEND_BASE_URL+import.meta.env.VITE_USER_REGISTRATION
+      const url =
+        import.meta.env.VITE_BACKEND_BASE_URL +
+        import.meta.env.VITE_USER_REGISTRATION;
       const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -35,7 +37,7 @@ function Signup() {
       const data = await response.json();
 
       if (data.status) {
-        navigate("/login?email="+data.data["email"]);
+        navigate("/login?email=" + data.data["email"]+"&type=success&msg=Account has been created, please verify your email to signin. ");
       } else {
         setErrorMessage(Array.isArray(data.messages) ? data.messages : [data.messages]);
       }
@@ -47,8 +49,15 @@ function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="relative min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+      {/* Loading Backdrop */}
+      {loading && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
+          <div className="w-16 h-16 border-4 border-white border-t-blue-500 rounded-full animate-spin"></div>
+        </div>
+      )}
+
+      <div className="w-full max-w-md z-10">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold tracking-tight">prosar.</h1>
           <p className="text-sm text-gray-500">Prioritise Smarter</p>

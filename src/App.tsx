@@ -12,6 +12,7 @@ import Board from "./Board";
 import Footer from "./Footer";
 import Login from "./Login";
 import Signup from "./Signup";
+import { AppContextProvider, useAppContextData } from "./AppContext";
 
 const navigation = [
   { name: "Dashboard", href: "/app", icon: LayoutDashboard },
@@ -23,6 +24,7 @@ function MainLayout() {
   const [isOpen, setIsOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const { email, name} = useAppContextData();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -87,7 +89,7 @@ function MainLayout() {
                         className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         onClick={() => setIsDropdownOpen(false)}
                       >
-                        Profile
+                        <b>Profile</b> <br/> {name} <br />{email}
                       </button>
                     </li>
                     <li>
@@ -159,6 +161,7 @@ function MainLayout() {
           )}
         </AnimatePresence>
 
+        
         <div className="flex-1 flex flex-col min-h-[calc(100vh-4rem)] overflow-auto">
           <Routes>
             <Route path="/home" element={<Dashboard />} />
@@ -176,17 +179,19 @@ function MainLayout() {
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* Auth Pages (Separate from Main Layout) */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+    <AppContextProvider>
+      <Router>
+        <Routes>
+          {/* Auth Pages (Separate from Main Layout) */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
 
-        {/* Main App Pages */}
-        <Route path="/*" element={<MainLayout />} />
+          {/* Main App Pages */}
+          <Route path="/*" element={<MainLayout />} />
 
-      </Routes>
-    </Router>
+        </Routes>
+      </Router>
+    </AppContextProvider>
   );
 }
 

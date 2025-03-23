@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Chrome, Microscope as Microsoft } from 'lucide-react';
+import { useAppContextData } from './AppContext';
 
 function Login() {
+  const { setEmail, setToken, setName } = useAppContextData();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [messageType, setMessageType] = useState('text-blue-500 text-sm mb-4');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -13,17 +17,27 @@ function Login() {
     const params = new URLSearchParams(location.search);
     const email = params.get('email');
     const msg = params.get('msg');
+    const msg_type = params.get('type');
 
     if (email) setUsername(email);
     if (msg) setErrorMessage(msg);
+    if (msg_type)
+      setMessageType(
+        msg_type === 'error'
+          ? 'text-red-500 text-sm mb-4'
+          : 'text-blue-500 text-sm mb-4'
+      );
   }, [location.search]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMessage('');
+    setLoading(true);
 
     try {
-      const url = import.meta.env.VITE_BACKEND_BASE_URL.concat(import.meta.env.VITE_TOKEN_URL);
+      const url = import.meta.env.VITE_BACKEND_BASE_URL.concat(
+        import.meta.env.VITE_TOKEN_URL
+      );
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -31,21 +45,33 @@ function Login() {
       });
 
       const data = await response.json();
-
       if (data.status) {
-        console.log('Token:', data.data.token);
+        setErrorMessage('');
+        setToken(data.data.token)
+        setEmail(data.data.email)
+        setName(data.data.name)
         navigate('/home');
       } else {
+        setMessageType('text-red-500 text-sm mb-4')
         setErrorMessage(data.messages[0] || 'Login failed');
       }
     } catch (error) {
       setErrorMessage('An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="relative min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+      {/* Backdrop Overlay */}
+      {loading && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
+          <div className="w-16 h-16 border-4 border-white border-t-blue-500 rounded-full animate-spin"></div>
+        </div>
+      )}
+
+      <div className="w-full max-w-md z-10">
         {/* Logo */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold tracking-tight">prosar.</h1>
@@ -54,7 +80,11 @@ function Login() {
 
         {/* Login Form */}
         <div className="bg-white rounded-2xl shadow-sm p-8">
-          {errorMessage && <center><p className="text-red-500 text-sm mb-4">{errorMessage}</p></center>}
+          {errorMessage && (
+            <center>
+              <p className={messageType}>{errorMessage}</p>
+            </center>
+          )}
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
@@ -77,9 +107,10 @@ function Login() {
             </div>
             <button
               type="submit"
-              className="w-full bg-gray-900 text-white py-3 rounded-xl hover:bg-gray-800 transition-colors"
+              disabled={loading}
+              className="w-full bg-gray-900 text-white py-3 rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-70"
             >
-              Login
+              {loading ? 'Logging in...' : 'Login'}
             </button>
             <button
               type="button"
