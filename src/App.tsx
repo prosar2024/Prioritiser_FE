@@ -1,5 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Bell, Cog, Settings } from "lucide-react";
+import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+import { Bell, Cog } from "lucide-react";
 import { IdeaHub } from "./components/IdeaHub";
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
@@ -24,7 +24,8 @@ function MainLayout() {
   const [isOpen, setIsOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const { email, name} = useAppContextData();
+  const { name, clearUser } = useAppContextData();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -69,10 +70,11 @@ function MainLayout() {
           </div>
           <div className="flex items-center gap-4">
             <button className="p-2 hover:bg-gray-100 rounded-full">
-              <Bell className="h-5 w-5 text-gray-600" />
+              {name}
             </button>
+            
             <button className="p-2 hover:bg-gray-100 rounded-full">
-              <Settings className="h-5 w-5 text-gray-600" />
+              <Bell className="h-5 w-5 text-gray-600" />
             </button>
             <div className="relative dropdown">
               <button
@@ -89,13 +91,13 @@ function MainLayout() {
                         className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         onClick={() => setIsDropdownOpen(false)}
                       >
-                        <b>Profile</b> <br/> {name} <br />{email}
+                        Profile
                       </button>
                     </li>
                     <li>
                       <button
                         className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        onClick={() => setIsDropdownOpen(false)}
+                        onClick={() => {setIsDropdownOpen(false); clearUser();  navigate('/login'); }}
                       >
                         Logout
                       </button>
