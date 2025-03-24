@@ -14,7 +14,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showOwnOnly, setShowOwnOnly] = useState(false);
-  const { email, token } = useAppContextData();
+  const { email } = useAppContextData();
 
   function formatDate(dateStr : string) {
     const date = new Date(dateStr);
@@ -69,7 +69,7 @@ function Dashboard() {
     };
 
     fetchBoards();
-  }, [email, token]);
+  }, [email]);
 
   // ✅ Combine filters
   const filteredBoards = fetchedBoards.filter(board =>
