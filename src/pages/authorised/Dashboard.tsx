@@ -142,8 +142,7 @@ function Dashboard() {
         )}
 
         <AnimatePresence>
-          {showModal && (<CreateBoardModal onClose={() => setShowModal(false)} />
-          )}
+          {showModal && (<CreateBoardModal onClose={() => setShowModal(false)} />)}
         </AnimatePresence>
       </div>
     </React.Fragment>

@@ -13,6 +13,7 @@ import Footer from "../../components/Footer";
 import { useAppContextData } from "../../lib/AppContext";
 import ErrorPage from "./ErrorPage";
 import { UserProfile } from "./UserProfile";
+import { BoardProvider } from "../../lib/BoardContext";
 
 const navigation = [
   { name: "Dashboard", href: "/home", icon: LayoutDashboard },
@@ -176,7 +177,7 @@ export default function MainLayout() {
             <Route path="/ideas" element={<IdeaHub />} />
             <Route path="/experts" element={<ExpertConsultation />} />
             <Route path="/profile" element={<UserProfile />} />
-            <Route path="/board/:boardId" element={<Board />} />
+            <Route path="/board/:boardId" element={<BoardProvider><Board /></BoardProvider>} />
             <Route path="/error" element={<ErrorPage />} />
           </Routes>
         </div>
