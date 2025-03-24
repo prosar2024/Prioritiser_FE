@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import HTTPUtil from "../../lib/httputil";
 
 function Signup() {
   const [formData, setFormData] = useState({
@@ -23,19 +24,8 @@ function Signup() {
     setLoading(true);
 
     try {
-      const url =
-        import.meta.env.VITE_BACKEND_BASE_URL +
-        import.meta.env.VITE_USER_REGISTRATION;
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
+      const url = import.meta.env.VITE_BACKEND_BASE_URL + import.meta.env.VITE_USER_REGISTRATION;
+      const data = await HTTPUtil.request(url, 'POST', JSON.stringify(formData), false);
       if (data.status) {
         navigate("/login?email=" + data.data["email"]+"&type=success&msg=Account has been created, please verify your email to signin. ");
       } else {

@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Chrome, Microscope as Microsoft } from 'lucide-react';
-import { useAppContextData } from './AppContext';
+import HTTPUtil from '../../lib/httputil';
 
 function Login() {
-  const { setEmail, setToken, setName } = useAppContextData();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -35,21 +34,14 @@ function Login() {
     setLoading(true);
 
     try {
-      const url = import.meta.env.VITE_BACKEND_BASE_URL.concat(
-        import.meta.env.VITE_TOKEN_URL
-      );
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await response.json();
+      const url = import.meta.env.VITE_BACKEND_BASE_URL+import.meta.env.VITE_TOKEN_URL
+      const body = JSON.stringify({ username, password })
+      const data = await HTTPUtil.request(url, 'POST', body, false);
       if (data.status) {
         setErrorMessage('');
-        setToken(data.data.token)
-        setEmail(data.data.email)
-        setName(data.data.name)
+        localStorage.setItem('token', data.data.token);
+        localStorage.setItem('email', data.data.email);
+        localStorage.setItem('name', data.data.name);
         navigate('/home');
       } else {
         setMessageType('text-red-500 text-sm mb-4')

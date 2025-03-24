@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import CreateBoardModal from './CreateBoardModal';
-import BoardCard from './BoardCard';
-import { useAppContextData } from './AppContext';
+import CreateBoardModal from '../../components/CreateBoardModal';
+import BoardCard from '../../components/BoardCard';
+import { useAppContextData } from '../../lib/AppContext';
+import HTTPUtil from '../../lib/httputil';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -12,18 +13,10 @@ function Dashboard() {
   const [fetchedBoards, setFetchedBoards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showOwnOnly, setShowOwnOnly] = useState(false); // 👈 NEW STATE
+  const [showOwnOnly, setShowOwnOnly] = useState(false);
   const { email, token } = useAppContextData();
 
-  const handleCreateBoard = (name: string, description: string) => {
-    const newBoardId = crypto.randomUUID();
-    const created_on = new Date().toISOString(); // add this since it was referenced
-    setFetchedBoards(prev => [...prev, { id: newBoardId, name, is_owner, owner_name, description, created_on }]);
-    setShowModal(false);
-    navigate(`/board/${newBoardId}`);
-  };
-
-  function formatDate(dateStr) {
+  function formatDate(dateStr : string) {
     const date = new Date(dateStr);
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const day = date.getUTCDate();
@@ -53,17 +46,10 @@ function Dashboard() {
       setLoading(true);
       try {
         const url = import.meta.env.VITE_BACKEND_BASE_URL + import.meta.env.VITE_LOAD_BOARDS_URL;
-        const response = await fetch(url, {
-          headers: {
-            'email': email,
-            'token': token,
-          },
-        });
-
-        const data = await response.json();
+        const data = await HTTPUtil.request(url, 'GET');
         if (data.status) {
-          const formatted = data.data.map((board: any, index: number) => ({
-            id: index.toString(),
+          const formatted = data.data.map((board: any) => ({
+            id: board.board_id,
             name: board.name,
             description: board.description,
             collaborators: board.collaborators,
@@ -156,11 +142,7 @@ function Dashboard() {
         )}
 
         <AnimatePresence>
-          {showModal && (
-            <CreateBoardModal
-              onClose={() => setShowModal(false)}
-              onSubmit={handleCreateBoard}
-            />
+          {showModal && (<CreateBoardModal onClose={() => setShowModal(false)} />
           )}
         </AnimatePresence>
       </div>

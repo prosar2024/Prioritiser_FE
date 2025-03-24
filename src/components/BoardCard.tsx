@@ -1,11 +1,12 @@
 import { motion } from 'framer-motion';
 import { User, Users } from 'lucide-react';
 
-function BoardCard({ name, description, is_owner, owner_name, created_on }) {
+function BoardCard({ name, description, is_owner, owner_name, created_on, onClick }) {
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
+      onClick={onClick} // ← Add this line
       className="aspect-square bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer flex flex-col"
     >
       <h3 className="text-lg font-semibold mb-2">{name}</h3>

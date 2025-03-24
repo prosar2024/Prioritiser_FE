@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Calendar, Clock, Users, MessageSquare } from 'lucide-react';
-import Footer from '../Footer';
+import { useState } from 'react';
+import { Clock, Users, MessageSquare } from 'lucide-react';
+import Footer from './Footer';
 
 interface TimeSlot {
   id: string;

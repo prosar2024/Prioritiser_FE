@@ -1,15 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Select from 'react-select';
-import { useAppContextData } from './AppContext';
+import { useAppContextData } from '../lib/AppContext';
+import HTTPUtil from '../lib/httputil';
+import { useNavigate } from 'react-router-dom';
 
-function CreateBoardModal({
-  onClose,
-  onSubmit,
-}: {
-  onClose: () => void;
-  onSubmit: (name: string, description: string, collaborators: string[]) => void;
-}) {
+function CreateBoardModal({onClose}: { onClose: () => void;}) {
   const [boardName, setBoardName] = useState('');
   const [boardDescription, setBoardDescription] = useState('');
   const [selectedCollaborators, setSelectedCollaborators] = useState([]);
@@ -17,6 +13,8 @@ function CreateBoardModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { email, token } = useAppContextData();
+  const navigate = useNavigate();
+    
 
   useEffect(() => {
     const fetchCollaborators = async () => {
@@ -25,17 +23,7 @@ function CreateBoardModal({
 
       try {
         const eligible_contributors_url = import.meta.env.VITE_BACKEND_BASE_URL + import.meta.env.VITE_ELIGILE_CONTRIBUTORS;
-        const response = await fetch(eligible_contributors_url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'email': email,
-            'token': token,
-          },
-        });
-
-        const data = await response.json();
-
+        let data = await HTTPUtil.request(eligible_contributors_url, "POST")
         if (data.status) {
           const formatted = data.data.map((item: { name: string; email: string }) => ({
             value: item.email,
@@ -69,22 +57,11 @@ function CreateBoardModal({
         description: boardDescription,
         collaborators,
       })
-      console.log("BODY : ", body)
-      const response = await fetch(create_board_url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'email': email,
-          'token': token,
-        },
-        body: body,
-      });
-
-      const data = await response.json();
-
+      let data = await HTTPUtil.request(create_board_url, "POST", body)
+      console.log(data)  
       if (data.status) {
-        onSubmit(boardName, boardDescription, collaborators); 
-        onClose(); 
+        onClose();
+        navigate(`/board/`+data.data.board_id);
       } else {
         setError(data.messages?.[0] || 'Failed to create board');
       }
@@ -97,7 +74,6 @@ function CreateBoardModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      {/* Loading Backdrop */}
       {loading && (
         <div className="absolute inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
           <div className="w-12 h-12 border-4 border-white border-t-blue-500 rounded-full animate-spin"></div>

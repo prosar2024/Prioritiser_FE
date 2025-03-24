@@ -1,6 +1,6 @@
-import { SetGoals } from './components/board/SetGoals';
-import { Warehouse } from './components/board/Warehouse';
-import { SolutionBoard } from './components/board/SolutionBoard';
+import { SetGoals } from '../../components/board/SetGoals';
+import { Warehouse } from '../../components/board/Warehouse';
+import { SolutionBoard } from '../../components/board/SolutionBoard';
 import { useState } from 'react';
 import { Check, Pencil } from 'lucide-react';
 
