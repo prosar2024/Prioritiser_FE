@@ -89,5 +89,12 @@ export const BoardProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [boardID]);
 
+  useEffect(() => {
+    return () => {
+      localStorage.removeItem("boardData");
+      setBoardData(defaultValue);
+    };
+  }, []); // empty array = only runs once on mount/unmount
+  
   return <BoardContext.Provider value={boardData}>{children}</BoardContext.Provider>;
 };

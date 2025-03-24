@@ -68,8 +68,8 @@ function UpdateBoardModal({onClose}) {
       const create_board_url = import.meta.env.VITE_BACKEND_BASE_URL + import.meta.env.VITE_UPDATE_BOARD_API;
       let body = JSON.stringify({
         board_id : boardID,
-        name: boardName,
-        description: boardDescription,
+        name: name,
+        description: desc,
         collaborators,
       })
       let data = await HTTPUtil.request(create_board_url, "POST", body)
