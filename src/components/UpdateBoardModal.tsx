@@ -4,18 +4,23 @@ import Select from 'react-select';
 import HTTPUtil from '../lib/httputil';
 import { useBoardContext } from '../lib/BoardContext';
 
-function UpdateBoardModal({onClose}) {
-  const [selectedCollaborators, setSelectedCollaborators] = useState([]);
-  const [collaboratorOptions, setCollaboratorOptions] = useState([]);
-  const [name, setName] = useState('');
-  const [desc, setDesc] = useState('');
+function UpdateBoardModal({ onClose }) {
+  const { boardID, boardName, boardDescription, ownerName, canEdit, collaborators } = useBoardContext();
   
+  // Initialize state with context values directly
+  const [name, setName] = useState(boardName || '');
+  const [desc, setDesc] = useState(boardDescription || '');
+  const [selectedCollaborators, setSelectedCollaborators] = useState(() => {
+    return collaborators
+      .filter((item) => !item.owner)
+      .map((item) => ({
+        value: item.email,
+        label: `${item.name} | ${item.email}`,
+      }));
+  });
+  const [collaboratorOptions, setCollaboratorOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { boardID, boardName, boardDescription, ownerName, canEdit, collaborators } = useBoardContext();
-    
-
-  
 
   useEffect(() => {
     const fetchCollaborators = async () => {
@@ -24,25 +29,14 @@ function UpdateBoardModal({onClose}) {
 
       try {
         const eligible_contributors_url = import.meta.env.VITE_BACKEND_BASE_URL + import.meta.env.VITE_ELIGILE_CONTRIBUTORS;
-        let data = await HTTPUtil.request(eligible_contributors_url, "POST")
+        let data = await HTTPUtil.request(eligible_contributors_url, "POST");
+        
         if (data.status) {
-          const formatted = data.data.map((item: { name: string; email: string }) => ({
+          const formatted = data.data.map((item) => ({
             value: item.email,
             label: `${item.name} | ${item.email}`,
           }));
           setCollaboratorOptions(formatted);
-
-          var selCollab = collaborators
-            .filter((item: { name: string; email: string, owner:boolean }) => item.owner != true)
-            .map((item: { name: string; email: string }) => ({
-              value: item.email,
-              label: `${item.name} | ${item.email}`,
-            }));
-          setSelectedCollaborators(selCollab)
-          
-          setName(boardName)
-          setDesc(boardDescription)
-
         } else {
           setError(data.messages?.[0] || 'Failed to fetch collaborators');
         }
@@ -56,36 +50,34 @@ function UpdateBoardModal({onClose}) {
     fetchCollaborators();
   }, []);
 
-
   const handleUpdateBoard = async () => {
-    if (!boardName.trim()) return;
+    if (!name.trim()) return;
 
-    const collaborators = selectedCollaborators.map((c: any) => c.value);
+    const collaborators = selectedCollaborators.map((c) => c.value);
     setLoading(true);
     setError('');
 
     try {
       const create_board_url = import.meta.env.VITE_BACKEND_BASE_URL + import.meta.env.VITE_UPDATE_BOARD_API;
       let body = JSON.stringify({
-        board_id : boardID,
+        board_id: boardID,
         name: name,
         description: desc,
         collaborators,
-      })
-      let data = await HTTPUtil.request(create_board_url, "POST", body)
-      console.log(data)  
+      });
+      let data = await HTTPUtil.request(create_board_url, "POST", body);
+      
       if (data.status) {
         onClose();
       } else {
-        setError(data.messages?.[0] || 'Failed to create board');
+        setError(data.messages?.[0] || 'Failed to update board');
       }
     } catch (err) {
-      setError('An error occurred while creating the board');
+      setError('An error occurred while updating the board');
     } finally {
       setLoading(false);
     }
   };
-
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -161,15 +153,15 @@ function UpdateBoardModal({onClose}) {
           >
             Cancel
           </button>
-          {canEdit &&
-          <button
-            disabled={!boardName.trim() || loading}
-            className="px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 disabled:opacity-50"
-            onClick={handleUpdateBoard}
-          >
-            Update Board
-          </button>
-          }
+          {canEdit && (
+            <button
+              disabled={!name.trim() || loading}
+              className="px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 disabled:opacity-50"
+              onClick={handleUpdateBoard}
+            >
+              Update Board
+            </button>
+          )}
         </div>
       </motion.div>
     </div>
